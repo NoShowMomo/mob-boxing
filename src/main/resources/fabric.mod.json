@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "mobboxing",
+  "version": "${version}",
+  "name": "Mob Boxing",
+  "description": "Peaceful animals square up and box each other: they rear onto their hind legs, throw punches with their front legs, and get knocked out instead of killed.",
+  "authors": ["You"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.mobboxing.MobBoxing"]
+  },
+  "mixins": [
+    "mobboxing.mixins.json",
+    { "config": "mobboxing.client.mixins.json", "environment": "client" }
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
