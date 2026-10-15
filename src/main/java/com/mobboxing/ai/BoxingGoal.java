@@ -4,7 +4,7 @@ import com.mobboxing.BoxingConfig;
 import com.mobboxing.BoxingHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -33,13 +33,13 @@ public class BoxingGoal extends Goal {
         return punching;
     }
 
-    private final AnimalEntity mob;
+    private final PassiveEntity mob;
     private LivingEntity target;
     private int fightTicks;
     private int punchCooldown;
     private int nextFightAge;
 
-    public BoxingGoal(AnimalEntity mob) {
+    public BoxingGoal(PassiveEntity mob) {
         this.mob = mob;
         this.setControls(EnumSet.of(Control.MOVE, Control.LOOK));
     }
@@ -51,7 +51,7 @@ public class BoxingGoal extends Goal {
         if (other instanceof PlayerEntity player) {
             return BoxingConfig.get().retaliateAgainstPlayers && !player.isCreative() && !player.isSpectator();
         }
-        return other instanceof AnimalEntity animal && BoxingHelper.isBoxer(animal);
+        return other instanceof PassiveEntity animal && BoxingHelper.isBoxer(animal);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class BoxingGoal extends Goal {
             return false;
         }
         Box area = mob.getBoundingBox().expand(cfg.searchRadius, 4.0, cfg.searchRadius);
-        List<AnimalEntity> candidates = mob.getWorld().getEntitiesByClass(AnimalEntity.class, area, other ->
+        List<PassiveEntity> candidates = mob.getWorld().getEntitiesByClass(PassiveEntity.class, area, other ->
                 other != mob
                         && validOpponent(other)
                         && (cfg.sameSpeciesFight || other.getType() != mob.getType())

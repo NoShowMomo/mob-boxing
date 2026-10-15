@@ -2,7 +2,8 @@ package com.mobboxing;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.AbstractHorseEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.registry.Registries;
 
@@ -21,7 +22,7 @@ public final class BoxingHelper {
 
     /** Is this kind of entity allowed to box at all (ignores per-animal state)? Safe on both sides. */
     public static boolean isEligibleType(Entity entity) {
-        if (!(entity instanceof AnimalEntity)) {
+        if (!(entity instanceof PassiveEntity)) {
             return false;
         }
         return TYPE_CACHE.computeIfAbsent(entity.getType(), type ->
@@ -29,14 +30,15 @@ public final class BoxingHelper {
     }
 
     /** Can this particular animal box right now? */
-    public static boolean isBoxer(AnimalEntity animal) {
+    public static boolean isBoxer(PassiveEntity animal) {
         return BoxingConfig.get().enabled
                 && isEligibleType(animal)
                 && !animal.isBaby()
                 && !animal.hasVehicle()
                 && !animal.hasPassengers()
                 && !animal.isLeashed()
-                && !(animal instanceof TameableEntity pet && pet.isTamed());
+                && !(animal instanceof TameableEntity pet && pet.isTamed())
+                && !(animal instanceof AbstractHorseEntity horse && horse.isTame());
     }
 
     public static boolean isKnockedOut(net.minecraft.entity.LivingEntity entity) {

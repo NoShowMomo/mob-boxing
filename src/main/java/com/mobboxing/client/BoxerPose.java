@@ -40,16 +40,16 @@ public final class BoxerPose {
         State s = STATES.get(entity);
         boolean ko = BoxingHelper.isKnockedOut(entity);
         boolean fighting = !ko && mob.isAttacking();
+        float now = entity.age + tickDelta;
         if (s == null) {
             if (!ko && !fighting) {
                 return null;
             }
             s = new State();
-            s.lastTime = entity.age + tickDelta;
+            s.lastTime = now - 1f; // so the very first frame already advances the animation
             STATES.put(entity, s);
         }
 
-        float now = entity.age + tickDelta;
         float dt = now - s.lastTime;
         if (dt < 0 || dt > 40) {
             dt = 0;
@@ -66,7 +66,7 @@ public final class BoxerPose {
         s.lastSwing = swing;
         s.swing = swing;
 
-        if (s.stand <= 0.001f && s.ko <= 0.001f) {
+        if (!fighting && !ko && s.stand <= 0.001f && s.ko <= 0.001f) {
             STATES.remove(entity);
             return null;
         }

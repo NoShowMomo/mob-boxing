@@ -21,6 +21,10 @@ public class BoxingConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static BoxingConfig instance = new BoxingConfig();
 
+    private static final int CURRENT_VERSION = 2;
+    /** Bumped when defaults change; an older file is replaced by the new defaults. */
+    public int configVersion = CURRENT_VERSION;
+
     /** Master switch. */
     public boolean enabled = true;
     /** Idle animals occasionally pick a fight with a nearby animal. */
@@ -35,7 +39,7 @@ public class BoxingConfig {
     /** How far (blocks) an animal looks for an opponent. */
     public double searchRadius = 12.0;
     /** Damage per punch (2.0 = one heart). */
-    public float punchDamage = 2.0f;
+    public float punchDamage = 1.0f;
     /** Ticks between punches (20 ticks = 1 second). */
     public int punchCooldownTicks = 14;
     /** Walking speed multiplier while fighting. */
@@ -46,20 +50,21 @@ public class BoxingConfig {
     public int restTicks = 300;
 
     /** Mob-vs-mob punches never kill: at or below this health the victim is knocked out instead. */
-    public float knockoutHealth = 2.0f;
+    public float knockoutHealth = 1.0f;
     /** How long a knocked-out animal stays down (it also regenerates meanwhile). */
     public int knockoutTicks = 240;
 
     /** How far (degrees) a boxer rears up. 90 = fully upright. */
     public float standAngleDegrees = 65.0f;
 
-    /** Entity IDs that never box (flying, swimming, mounts, and animals with their own attack AI). */
+    /** Entity IDs that never box. Remove an ID to let that mob box. */
     public List<String> excludedEntities = new ArrayList<>(List.of(
-            "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:camel",
-            "minecraft:llama", "minecraft:trader_llama", "minecraft:bee", "minecraft:parrot",
-            "minecraft:axolotl", "minecraft:turtle", "minecraft:frog", "minecraft:sniffer",
-            "minecraft:strider", "minecraft:wolf", "minecraft:fox", "minecraft:cat",
-            "minecraft:ocelot", "minecraft:polar_bear", "minecraft:panda", "minecraft:armadillo"
+            // fly or swim, so rearing up makes no sense
+            "minecraft:bee", "minecraft:parrot", "minecraft:axolotl", "minecraft:turtle", "minecraft:allay",
+            "minecraft:frog", "minecraft:tadpole", "minecraft:strider",
+            // run on the Brain AI system, which ignores the goals this mod adds
+            "minecraft:villager", "minecraft:wandering_trader", "minecraft:goat", "minecraft:camel",
+            "minecraft:sniffer", "minecraft:armadillo"
     ));
 
     public static BoxingConfig get() {
@@ -71,7 +76,14 @@ public class BoxingConfig {
         BoxingConfig loaded = null;
         if (Files.exists(path)) {
             try (Reader reader = Files.newBufferedReader(path)) {
-                loaded = GSON.fromJson(reader, BoxingConfig.class);
+                com.google.gson.JsonObject json = GSON.fromJson(reader, com.google.gson.JsonObject.class);
+                // A missing "configVersion" means a file from an older release: use the new defaults.
+                if (json != null && json.has("configVersion")
+                        && json.get("configVersion").getAsInt() == CURRENT_VERSION) {
+                    loaded = GSON.fromJson(json, BoxingConfig.class);
+                } else {
+                    MobBoxing.LOGGER.info("Old or empty mobboxing.json found - replacing it with the new defaults");
+                }
             } catch (Exception e) {
                 MobBoxing.LOGGER.warn("Could not read {} - using defaults", path, e);
             }

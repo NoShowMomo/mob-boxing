@@ -12,7 +12,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -39,7 +39,7 @@ public class MobBoxing implements ModInitializer {
 
         // Give every animal the boxing goal when it enters the world.
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
-            if (entity instanceof AnimalEntity animal) {
+            if (entity instanceof PassiveEntity animal) {
                 attachGoal(animal);
             }
         });
@@ -50,7 +50,7 @@ public class MobBoxing implements ModInitializer {
         LOGGER.info("Mob Boxing loaded - ding ding!");
     }
 
-    private static void attachGoal(AnimalEntity animal) {
+    private static void attachGoal(PassiveEntity animal) {
         GoalSelector selector = ((MobEntityAccessor) animal).mobboxing$getGoalSelector();
         for (PrioritizedGoal pg : selector.getGoals()) {
             if (pg.getGoal() instanceof BoxingGoal) {
@@ -65,7 +65,7 @@ public class MobBoxing implements ModInitializer {
         if (!BoxingGoal.isPunching()) {
             return true; // only our own punches are non-lethal; everything else is vanilla
         }
-        if (!(victim instanceof AnimalEntity animal) || !BoxingHelper.isEligibleType(animal)) {
+        if (!(victim instanceof PassiveEntity animal) || !BoxingHelper.isEligibleType(animal)) {
             return true; // players etc. take punches normally
         }
         if (BoxingHelper.isKnockedOut(animal)) {
@@ -78,7 +78,7 @@ public class MobBoxing implements ModInitializer {
         return true;
     }
 
-    private static void knockOut(AnimalEntity victim) {
+    private static void knockOut(PassiveEntity victim) {
         BoxingConfig cfg = BoxingConfig.get();
         victim.addStatusEffect(new StatusEffectInstance(KNOCKED_OUT, cfg.knockoutTicks, 0, false, false, true));
         victim.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, cfg.knockoutTicks, 1, false, false, false));
